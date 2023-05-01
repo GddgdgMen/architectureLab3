@@ -6,7 +6,7 @@ import (
 	"golang.org/x/exp/shiny/screen"
 )
 
-// Receiver отримує текстуру, яка була підготовлена в результаті виконання команд у циелі подій.
+// Receiver отримує текстуру, яка була підготовлена в результаті виконання команд у циклі подій.
 type Receiver interface {
 	Update(t screen.Texture)
 }
@@ -16,7 +16,7 @@ type Loop struct {
 	Receiver Receiver
 
 	next screen.Texture // текстура, яка зараз формується
-	prev screen.Texture // текстура, яка була відправленя останнього разу у Receiver
+	prev screen.Texture // текстура, яка була відправлення останнього разу у Receiver
 
 	mq messageQueue
 }
@@ -28,17 +28,27 @@ func (l *Loop) Start(s screen.Screen) {
 	l.next, _ = s.NewTexture(size)
 	l.prev, _ = s.NewTexture(size)
 
-	// TODO: ініціалізувати чергу подій.
-	// TODO: запустити рутину обробки повідомлень у черзі подій.
+	l.mq = messageQueue{}
+	go l.MessageProcess()
+}
+
+// MessageProcess запускає рутину обробки повідомлень у черзі подій
+func (l *Loop) MessageProcess() {
+	for {
+		if op := l.mq.pull(); op != nil {
+			update := op.Do(l.next)
+			if update {
+				l.Receiver.Update(l.next)
+				l.next, l.prev = l.prev, l.next
+			}
+		}
+	}
 }
 
 // Post додає нову операцію у внутрішню чергу.
 func (l *Loop) Post(op Operation) {
-	// TODO: реалізувати додавання операції в чергу. Поточна імплементація
-	update := op.Do(l.next)
-	if update {
-		l.Receiver.Update(l.next)
-		l.next, l.prev = l.prev, l.next
+	if op != nil {
+		l.mq.push(op)
 	}
 }
 
@@ -47,10 +57,20 @@ func (l *Loop) StopAndWait() {
 
 }
 
-// TODO: реалізувати власну чергу повідомлень.
 type messageQueue struct {
+	ops []Operation
 }
 
-func (mq *messageQueue) push(op Operation) {}
+func (mq *messageQueue) push(op Operation) {
+	mq.ops = append(mq.ops, op)
+}
 
-func (mq *messageQueue) pull() Operation { return nil }
+func (mq *messageQueue) pull() Operation {
+	if len(mq.ops) == 0 {
+		return nil
+	}
+
+	op := mq.ops[0]
+	mq.ops = mq.ops[1:]
+	return op
+}
