@@ -9,7 +9,7 @@ $ git clone https://github.com/GddgdgMen/architectureLab3.git
 ```
 Після цього запустіть програму за допомогою 
 ```
-$ go run ./.cmd/painter
+$ go run ./cmd/painter
 ```
 Ви можете використати bash скрипти надані у файлах для тестування моживостей програми.
 Також ви можете викорстати Postman або curl для введення команд вручну.
