@@ -3,7 +3,7 @@ package lang
 import (
 	"bufio"
 	"fmt"
-	"image/color"
+	"image"
 	"io"
 	"strconv"
 	"strings"
@@ -81,15 +81,16 @@ func (p *Parser) resetState() {
 func (p *Parser) parse(commandLine string) error {
 	parts := strings.Split(commandLine, " ")
 	instruction := parts[0]
+
 	var args []string
 	if len(parts) > 1 {
 		args = parts[1:]
 	}
 	var iArgs []int
 	for _, arg := range args {
-		i, err := strconv.Atoi(arg)
+		i, err := strconv.ParseFloat(arg, 64)
 		if err == nil {
-			iArgs = append(iArgs, i)
+			iArgs = append(iArgs, int(i*800))
 		}
 	}
 
@@ -99,10 +100,9 @@ func (p *Parser) parse(commandLine string) error {
 	case "green":
 		p.lastBgColor = painter.OperationFunc(painter.GreenFill)
 	case "bgrect":
-		p.lastBgRect = &painter.BgRectangle{X1: iArgs[0], Y1: iArgs[1], X2: iArgs[2], Y2: iArgs[3]}
+		p.lastBgRect = &painter.BgRectangle{Rect: image.Rect(iArgs[0], iArgs[1], iArgs[2], iArgs[3])}
 	case "figure":
-		clr := color.RGBA{R: 255, G: 255, B: 0, A: 1}
-		figure := painter.Figure{X: iArgs[0], Y: iArgs[1], C: clr}
+		figure := painter.Figure{Point: image.Point{X: iArgs[0], Y: iArgs[1]}}
 		p.figures = append(p.figures, &figure)
 	case "move":
 		moveOp := painter.Move{X: iArgs[0], Y: iArgs[1], Figures: p.figures}

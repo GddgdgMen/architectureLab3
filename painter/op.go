@@ -3,8 +3,8 @@ package painter
 import (
 	"image"
 	"image/color"
+	"image/draw"
 
-	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/exp/shiny/screen"
 )
 
@@ -50,22 +50,23 @@ func GreenFill(t screen.Texture) {
 }
 
 type BgRectangle struct {
-	X1, Y1, X2, Y2 int
+	Rect image.Rectangle
 }
 
 func (op *BgRectangle) Do(t screen.Texture) bool {
-	t.Fill(image.Rect(op.X1, op.Y1, op.X2, op.Y2), color.Black, screen.Src)
+	t.Fill(op.Rect, color.Black, screen.Src)
 	return false
 }
 
 type Figure struct {
-	X, Y int
-	C    color.RGBA
+	Point image.Point
 }
 
 func (op *Figure) Do(t screen.Texture) bool {
-	t.Fill(image.Rect(op.X-150, op.Y-100, op.X+150, op.Y), op.C, draw.Src)
-	t.Fill(image.Rect(op.X-50, op.Y, op.X+50, op.Y+100), op.C, draw.Src)
+	col := color.RGBA{R: 255, G: 255, B: 0, A: 1}
+
+	t.Fill(image.Rect(op.Point.X-200, op.Point.Y-75, op.Point.X+200, op.Point.Y+75), col, draw.Src)
+	t.Fill(image.Rect(op.Point.X-75, op.Point.Y-200, op.Point.X+75, op.Point.Y+200), col, draw.Src)
 	return false
 }
 
@@ -76,8 +77,8 @@ type Move struct {
 
 func (op *Move) Do(t screen.Texture) bool {
 	for i := range op.Figures {
-		op.Figures[i].X += op.X
-		op.Figures[i].Y += op.Y
+		op.Figures[i].Point.X += op.X
+		op.Figures[i].Point.Y += op.Y
 	}
 	return false
 }
