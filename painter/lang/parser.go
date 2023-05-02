@@ -78,19 +78,15 @@ func (p *Parser) resetState() {
 	p.updateOp = nil
 }
 
-func (p *Parser) parse(commandLine string) error {
-	parts := strings.Split(commandLine, " ")
-	instruction := parts[0]
+func (p *Parser) parse(cmdl string) error {
+	args := strings.Split(cmdl, " ")
+	instruction := args[0]
 
-	var args []string
-	if len(parts) > 1 {
-		args = parts[1:]
-	}
 	var iArgs []int
-	for _, arg := range args {
-		i, err := strconv.ParseFloat(arg, 64)
+	for _, arg := range args[1:] {
+		fArg, err := strconv.ParseFloat(arg, 64)
 		if err == nil {
-			iArgs = append(iArgs, int(i*800))
+			iArgs = append(iArgs, int(fArg*800))
 		}
 	}
 
@@ -100,11 +96,23 @@ func (p *Parser) parse(commandLine string) error {
 	case "green":
 		p.lastBgColor = painter.OperationFunc(painter.GreenFill)
 	case "bgrect":
+		err := validate(args, 4)
+		if err != nil {
+			return err
+		}
 		p.lastBgRect = &painter.BgRectangle{Rect: image.Rect(iArgs[0], iArgs[1], iArgs[2], iArgs[3])}
 	case "figure":
-		figure := painter.Figure{Point: image.Point{X: iArgs[0], Y: iArgs[1]}}
+		err := validate(args, 2)
+		if err != nil {
+			return err
+		}
+		figure := painter.Figure{X: iArgs[0], Y: iArgs[1]}
 		p.figures = append(p.figures, &figure)
 	case "move":
+		err := validate(args, 2)
+		if err != nil {
+			return err
+		}
 		moveOp := painter.Move{X: iArgs[0], Y: iArgs[1], Figures: p.figures}
 		p.moveOps = append(p.moveOps, &moveOp)
 	case "reset":
@@ -113,7 +121,21 @@ func (p *Parser) parse(commandLine string) error {
 	case "update":
 		p.updateOp = painter.UpdateOp
 	default:
-		return fmt.Errorf("could not parse command %v", commandLine)
+		return fmt.Errorf("could not parse command %v", cmdl)
+	}
+	return nil
+}
+
+func validate(args []string, expected int) error {
+	if len(args) != expected+1 {
+		return fmt.Errorf("wrong number of arguments for '%s', expected %v", args[0], expected)
+	}
+	var command = args[0]
+	for _, arg := range args[1:] {
+		_, err := strconv.ParseFloat(arg, 64)
+		if err != nil {
+			return fmt.Errorf("invalid argument for '%s': '%s' is not a number", command, arg)
+		}
 	}
 	return nil
 }

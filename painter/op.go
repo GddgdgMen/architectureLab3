@@ -59,14 +59,14 @@ func (op *BgRectangle) Do(t screen.Texture) bool {
 }
 
 type Figure struct {
-	Point image.Point
+	X, Y int
 }
 
 func (op *Figure) Do(t screen.Texture) bool {
 	col := color.RGBA{R: 255, G: 255, B: 0, A: 1}
 
-	t.Fill(image.Rect(op.Point.X-200, op.Point.Y-75, op.Point.X+200, op.Point.Y+75), col, draw.Src)
-	t.Fill(image.Rect(op.Point.X-75, op.Point.Y-200, op.Point.X+75, op.Point.Y+200), col, draw.Src)
+	t.Fill(image.Rect(op.X-200, op.Y-75, op.X+200, op.Y+75), col, draw.Src)
+	t.Fill(image.Rect(op.X-75, op.Y-200, op.X+75, op.Y+200), col, draw.Src)
 	return false
 }
 
@@ -77,8 +77,8 @@ type Move struct {
 
 func (op *Move) Do(t screen.Texture) bool {
 	for i := range op.Figures {
-		op.Figures[i].Point.X += op.X
-		op.Figures[i].Point.Y += op.Y
+		op.Figures[i].X += op.X
+		op.Figures[i].Y += op.Y
 	}
 	return false
 }
