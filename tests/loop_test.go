@@ -24,6 +24,7 @@ func TestLoop_Post(t *testing.T) {
 
 	l.Post(painter.OperationFunc(painter.GreenFill))
 	l.Post(painter.OperationFunc(painter.WhiteFill))
+	l.Post(painter.UpdateOp)
 
 	if mr.lastTexture != nil {
 		t.Fatal("Receiver got the texture too early")
@@ -46,15 +47,11 @@ type mockReceiver struct {
 	lastTexture screen.Texture
 }
 
-func (m mockReceiver) Update(t screen.Texture) {
+func (m *mockReceiver) Update(t screen.Texture) {
 	m.lastTexture = t
 }
 
 type mockScreen struct {
-}
-
-func (m mockScreen) Update(t screen.Texture) {
-	panic("implement me")
 }
 
 func (m mockScreen) NewBuffer(size image.Point) (screen.Buffer, error) {
@@ -85,7 +82,6 @@ func (m *mockTexture) Bounds() image.Rectangle {
 }
 
 func (m *mockTexture) Upload(dp image.Point, src screen.Buffer, sr image.Rectangle) {
-	//TODO implement me
 	panic("implement me")
 }
 
