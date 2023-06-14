@@ -1,30 +1,30 @@
-package tests
+package painter
 
 import (
-	"github.com/GddgdgMen/architectureLab3/painter"
-	"golang.org/x/exp/shiny/screen"
 	"image"
 	"image/color"
 	"image/draw"
 	"testing"
 	"time"
+
+	"golang.org/x/exp/shiny/screen"
 )
 
 func TestLoop_Post(t *testing.T) {
 	var (
-		l  painter.Loop
+		l  Loop
 		mr mockReceiver
 	)
 
-	l = painter.Loop{
+	l = Loop{
 		Receiver: &mr,
 	}
 
 	l.Start(mockScreen{})
 
-	l.Post(painter.OperationFunc(painter.GreenFill))
-	l.Post(painter.OperationFunc(painter.WhiteFill))
-	l.Post(painter.UpdateOp)
+	l.Post(OperationFunc(GreenFill))
+	l.Post(OperationFunc(WhiteFill))
+	l.Post(UpdateOp)
 
 	if mr.lastTexture != nil {
 		t.Fatal("Receiver got the texture too early")

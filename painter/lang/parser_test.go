@@ -1,12 +1,12 @@
-package tests
+package lang
 
 import (
-	"github.com/GddgdgMen/architectureLab3/painter"
-	"github.com/GddgdgMen/architectureLab3/painter/lang"
 	"image"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/GddgdgMen/architectureLab3/painter"
 )
 
 func TestParser_Parse(t *testing.T) {
@@ -71,7 +71,7 @@ func TestParser_Parse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &lang.Parser{}
+			p := &Parser{}
 			got, err := p.Parse(strings.NewReader(tt.command))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
